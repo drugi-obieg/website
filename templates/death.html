@@ -6,7 +6,7 @@
     <body style="width:100%;height:100%;background: #111;color:white;font-size:2rem;background-image:url(/static/img/death.avif);background-size:cover;background-position: center;">
         <div style="margin: 0 auto;max-width:400px;text-align: center;">
             <p>Assuming that I die on the</p>
-            <p style="font-size:2.2rem;line-height:1rem;">31<sup>st</sup> of December, 2080</p>
+            <p style="font-size:2.2rem;line-height:1rem;" id="death-date"></p>
             <p>I have </p>
             <p id="result" style="font-size:5rem;line-height: 0.8rem;">
             <p>days left to live.</p>
@@ -14,7 +14,6 @@
             <p>Did I please God today?</p>
             <hr/>
             <br/>
-
             <em>vulnerant omnes</em><br/>
             <em>ultima necat</em>
             <br/>
@@ -24,13 +23,42 @@
         </div>
     </body>
     <script type="text/javascript">
-        function updateResult() {
-            let end = new Date("12/31/2080");
-            let start = new Date();
-            let diff = end.getTime() - start.getTime();
-            let days = Math.floor(diff / (1000 * 3600 * 24));
-            document.getElementById("result").innerHTML = days.toLocaleString();
+        function getDateFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const dateParam = params.get('date');
+            
+            if (dateParam) {
+                const parsedDate = new Date(dateParam);
+                if (!isNaN(parsedDate.getTime())) {
+                    return parsedDate;
+                }
+            }
+            
+            return new Date("12/31/2070");
         }
+
+        function formatDeathDate(date) {
+            const day = date.getDate();
+            const suffix = day === 1 || day === 21 || day === 31 ? 'st' : 
+                          day === 2 || day === 22 ? 'nd' : 
+                          day === 3 || day === 23 ? 'rd' : 'th';
+            
+            const month = date.toLocaleDateString('en-US', { month: 'long' });
+            const year = date.getFullYear();
+            
+            return `${day}<sup>${suffix}</sup> of ${month}, ${year}`;
+        }
+
+        function updateResult() {
+            const end = getDateFromUrl();
+            const start = new Date();
+            const diff = end.getTime() - start.getTime();
+            const days = Math.floor(diff / (1000 * 3600 * 24));
+            
+            document.getElementById("result").innerHTML = days.toLocaleString();
+            document.getElementById("death-date").innerHTML = formatDeathDate(end);
+        }
+        
         window.onload = updateResult;
     </script>
 </html>
